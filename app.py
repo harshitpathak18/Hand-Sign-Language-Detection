@@ -34,7 +34,7 @@ tts_engine.setProperty('rate', 125)
 spell = SpellChecker()
 
 # Start video capture
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)
 
 # Variables for word formation
 word = ''
@@ -58,7 +58,7 @@ while True:
     if result.multi_hand_landmarks:
         for hand_landmarks in result.multi_hand_landmarks:
             # Draw landmarks
-            mp_draw.draw_landmarks(img, hand_landmarks, mp_hands.HAND_CONNECTIONS)
+            # mp_draw.draw_landmarks(img, hand_landmarks, mp_hands.HAND_CONNECTIONS)
             
             # Calculate distances between landmarks
             distances = []
@@ -80,33 +80,15 @@ while True:
             if len(frame_buffer) > buffer_size:
                 frame_buffer.pop(0)
             
-            # Confirm the gesture if we have enough frames
+            # Confirm the letter if we have enough frames
             if len(frame_buffer) == buffer_size:
                 most_common_gesture = Counter(frame_buffer).most_common(1)[0][0]
                 sign = Sign[most_common_gesture]
-                
-                # Display the gesture on the image
-                cv2.putText(img, f'Gesture: {sign}', (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
-                
-                # Add sign to word if enough time has passed since last gesture
-                current_time = time.time()
-                if current_time - last_gesture_time > gesture_timeout:
-                    if sign == 'Space':
-                        # Correct the word before speaking
-                        if word:
-                            corrected_word = spell.correction(word)
-                            tts_engine.say(corrected_word)
-                            tts_engine.runAndWait()
-                            word = ''
-                    else:
-                        word += sign
-                    
-                    last_gesture_time = current_time
 
-    # Display the formed word on the image
-    cv2.putText(img, f'Word: {word}', (10, 110), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
-
-    cv2.imshow("Sign Gesture", img)
+                # Display the letter on the image
+                cv2.putText(img, f'Letter: {sign}', (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 1.2, (230, 230, 250), 2, cv2.LINE_AA)
+              
+    cv2.imshow("Hand Sign Language", img)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
